@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
     ed_sensor_integration
     ed_perception
     ed
+    rgbd
 )
 
 # find_package(Boost REQUIRED COMPONENTS system program_options)
@@ -16,17 +17,16 @@ find_package(catkin REQUIRED COMPONENTS
 # ------------------------------------------------------------------------------------------------
 
 # Generate messages
-# add_message_files(
-#    FILES
-#    message1.msg
-#    ...
-# )
+add_message_files(
+   FILES
+   NamedImage.msg
+)
 
 # Generate services
 add_service_files(
    FILES
-   Segment.srv
-   Classify.srv
+   FitEntityInImage.srv
+   GetModelImages.srv
 )
 
 # Generate added messages and services with any dependencies listed here
@@ -58,8 +58,7 @@ include_directories(
 
 add_library(ed_robocup_plugin
     src/plugin.cpp
-    src/segmentation.cpp
-    src/perception.cpp
+    src/map_filter.cpp
 )
 target_link_libraries(ed_robocup_plugin ${catkin_LIBRARIES})
 add_dependencies(ed_robocup_plugin ${PROJECT_NAME}_generate_messages_cpp)

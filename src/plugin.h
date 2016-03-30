@@ -1,23 +1,29 @@
 #ifndef ED_ROBOCUP_PLUGIN_H_
 #define ED_ROBOCUP_PLUGIN_H_
 
-#include <queue>
-
 #include <ed/plugin.h>
 #include <ed/types.h>
-#include <ed/helpers/image_publisher.h>
 
 #include <rgbd/Client.h>
 
 #include <tf/transform_listener.h>
 
-#include "ed/convex_hull.h"
+#include "ed_robocup/FitEntityInImage.h"
+#include "ed_robocup/GetModelImages.h"
 
-// Locking
-#include "ed_robocup/Segment.h"
-#include "ed_robocup/Classify.h"
+// Map filtering
+#include "map_filter.h"
 
-#include "segmentation.h"
+// Model loading
+#include <ed/models/model_loader.h>
+
+// ----------------------------------------------------------------------------------------------------
+
+struct EntityModel
+{
+    ed::EntityConstPtr entity_prototype;
+    cv::Mat model_image;
+};
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -36,22 +42,31 @@ public:
 
 private:
 
-    Segmenter segmenter_;
-
-    // VISUALIZATION
-
-    ed::ImagePublisher viz_segmentation_;
-
-
     // COMMUNICATION
 
     std::string topic_;
 
-    rgbd::Client kinect_client_;
+    rgbd::Client rgbd_client_;
 
     tf::TransformListener* tf_listener_;
 
     ros::CallbackQueue cb_queue_;
+
+
+    // MODELS
+
+    ed::models::ModelLoader model_loader_;
+
+    std::map<std::string, EntityModel> models_;
+
+
+    // Map fitering
+
+    double wall_height_;
+
+    ros::Time last_wall_creation_;
+
+    MapFilter map_filter_;
 
 
     // DATA
@@ -63,13 +78,13 @@ private:
 
     // SERVICES
 
-    ros::ServiceServer srv_segment_;
+    ros::ServiceServer srv_fit_entity_;
 
-    bool srvSegment(ed_robocup::Segment::Request& req, ed_robocup::Segment::Response& res);
+    bool srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& req, ed_robocup::FitEntityInImage::Response& res);
 
-    ros::ServiceServer srv_classify_;
+    ros::ServiceServer srv_get_model_images_;
 
-    bool srvClassify(ed_robocup::Classify::Request& req,ed_robocup::Classify::Response& res);
+    bool srvGetModelImages(ed_robocup::GetModelImages::Request& req, ed_robocup::GetModelImages::Response& res);
 
 };
 

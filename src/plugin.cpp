@@ -6,6 +6,62 @@
 #include <ed/update_request.h>
 #include <ed/entity.h>
 #include <ed/measurement.h>
+#include <ed/world_model.h>
+#include <ed/entity.h>
+
+#include <opencv2/highgui/highgui.hpp>
+
+// ----------------------------------------------------------------------------------------------------
+
+bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup::NamedImage& msg)
+{
+    msg.encoding = encoding;
+
+    cv::Mat rgb_image;
+    if (image.channels() == 1)
+    {
+        // depth image
+        rgb_image = cv::Mat(image.rows, image.cols, CV_8UC3, cv::Scalar(0, 0, 0));
+        for(unsigned int i = 0; i < rgb_image.rows * rgb_image.cols; ++i)
+            rgb_image.at<cv::Vec3b>(i) = (image.at<float>(i) / 10) * cv::Vec3b(255, 255, 255);
+    }
+    else
+    {
+        rgb_image = image;
+    }
+
+    if (encoding == "jpg")
+    {
+        // OpenCV compression settings
+        std::vector<int> rgb_params;
+        rgb_params.resize(3, 0);
+
+        rgb_params[0] = CV_IMWRITE_JPEG_QUALITY;
+        rgb_params[1] = 50; // default is 95
+
+        // Compress image
+        if (!cv::imencode(".jpg", rgb_image, msg.data, rgb_params))
+        {
+            std::cout << "RGB image compression failed" << std::endl;
+            return false;
+        }
+    }
+    else if (encoding == "png")
+    {
+        std::vector<int> params;
+        params.resize(3, 0);
+
+        params[0] = CV_IMWRITE_PNG_COMPRESSION;
+        params[1] = 1;
+
+        if (!cv::imencode(".png", rgb_image, msg.data, params)) {
+            std::cout << "PNG image compression failed" << std::endl;
+            return false;
+        }
+    }
+
+    return true;
+}
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -26,31 +82,93 @@ void RobocupPlugin::initialize(ed::InitData& init)
 {
     tue::Configuration& config = init.config;
 
-    if (config.value("topic", topic_))
+    // Initialize RGBD client
+    std::string rgbd_topic;
+    if (config.value("rgbd_topic", rgbd_topic))
+        rgbd_client_.intialize(rgbd_topic);
+
+    std::string map_topic_in, map_topic_out;
+    if (config.value("map_topic_in", map_topic_in))
     {
-        std::cout << "[ED KINECT PLUGIN] Initializing kinect client with topic '" << topic_ << "'." << std::endl;
-        kinect_client_.intialize(topic_);
+        config.value("map_topic_out", map_topic_out);
+        map_filter_.initialize(map_topic_in, map_topic_out);
     }
 
-    if (config.readGroup("segmentation", tue::REQUIRED))
+    if (!config.value("wall_height", wall_height_, tue::OPTIONAL))
+        wall_height_ = 0.8;
+
+    // Load models (used for fitting)
+    if (config.readArray("models"))
     {
-        config.value("max_correspondence_distance", segmenter_.association_correspondence_distance_);
-        config.value("downsample_factor", segmenter_.downsample_factor_);
-        config.value("max_range", segmenter_.max_range_);
-        config.endGroup();
+        while(config.nextArrayItem())
+        {
+            std::string name;
+            if (!config.value("name", name))
+                continue;
+
+            ed::WorldModel world_model;
+
+            // Load model data
+            ed::UpdateRequest req;
+            std::stringstream error;
+            ed::UUID tmp_id = "id";
+
+            if (!model_loader_.create(tmp_id, name, req, error))
+            {
+                ed::log::error() << "While loading model '" << name << "': " << error.str() << std::endl;
+                continue;
+            }
+
+            world_model.update(req);
+            ed::EntityConstPtr entity = world_model.getEntity(tmp_id);
+
+            if (!entity)
+            {
+                ed::log::error() << "While loading model '" << name << "': could not load model (this should never happen)" << std::endl;
+                continue;
+            }
+
+            if (!entity->shape())
+            {
+                ed::log::error() << "While loading model '" << name << "': model does not have a shape" << std::endl;
+                continue;
+            }
+
+            cv::Mat model_image;
+            std::string image_path;
+            if (config.value("image", image_path, tue::OPTIONAL))
+            {
+                model_image = cv::imread(image_path);
+
+                if (!model_image.data)
+                    ed::log::error() << "Could not load model image: '" << image_path << "'." << std::endl;
+            }
+
+            if (!model_image.data)
+            {
+                model_image = cv::Mat(200, 200, CV_8UC3, cv::Scalar(0, 0, 0));
+            }
+
+            EntityModel& model = models_[name];
+            model.entity_prototype = entity;
+            model.model_image = model_image;
+        }
+
+        config.endArray();
     }
 
     tf_listener_ = new tf::TransformListener;
 
-    // Initialize image publishers for visualization
-    viz_segmentation_.initialize("viz/segmentation");
+    last_wall_creation_ = ros::Time(0);
 
-    // Initialize lock entity server
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    // Initialize services
     ros::NodeHandle nh("~");
     nh.setCallbackQueue(&cb_queue_);
 
-    srv_segment_ = nh.advertiseService("segment", &RobocupPlugin::srvSegment, this);
-    srv_classify_ = nh.advertiseService("classify", &RobocupPlugin::srvClassify, this);
+    srv_fit_entity_ = nh.advertiseService("fit_entity_in_image", &RobocupPlugin::srvFitEntityInImage, this);
+    srv_get_model_images_ = nh.advertiseService("get_model_images", &RobocupPlugin::srvGetModelImages, this);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -63,92 +181,37 @@ void RobocupPlugin::process(const ed::PluginInput& data, ed::UpdateRequest& req)
     // - - - - - - - - - - - - - - - - - -
     // Check ROS callback queue
 
-    cb_queue_.callAvailable();    
+    cb_queue_.callAvailable();
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-bool RobocupPlugin::srvSegment(ed_robocup::Segment::Request& req, ed_robocup::Segment::Response& res)
+bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& req, ed_robocup::FitEntityInImage::Response& res)
 {
-    // - - - - - - - - - - - - - - - - - -
-    // Fetch kinect image and place in image buffer
 
-    rgbd::ImageConstPtr rgbd_image = kinect_client_.nextImage();
-    if (!rgbd_image)
-    {
-        ROS_WARN("[ED ROBOCUP] No RGBD image available");
-        return true;
-    }
-
-    // - - - - - - - - - - - - - - - - - -
-    // Determine absolute kinect pose based on TF
-
-    geo::Pose3D sensor_pose;
-
-    if (!tf_listener_->waitForTransform("map", rgbd_image->getFrameId(), ros::Time(rgbd_image->getTimestamp()), ros::Duration(1.0)))
-    {
-        ROS_WARN("[ED ROBOCUP] Could not get camera pose");
-        return true;
-    }
-
-    try
-    {
-        tf::StampedTransform t_sensor_pose;
-        tf_listener_->lookupTransform("map", rgbd_image->getFrameId(), ros::Time(rgbd_image->getTimestamp()), t_sensor_pose);
-        geo::convert(t_sensor_pose, sensor_pose);
-    }
-    catch(tf::TransformException& ex)
-    {
-        ROS_WARN("[ED ROBOCUP] Could not get camera pose: %s", ex.what());
-        return true;
-    }
-
-    // Convert from ROS coordinate frame to geolib coordinate frame
-    sensor_pose.R = sensor_pose.R * geo::Matrix3(1, 0, 0, 0, -1, 0, 0, 0, -1);
-
-    std::vector<Segment> segments;
-    segmenter_.segment(*world_, *rgbd_image, sensor_pose, segments);
-
-    for(std::vector<Segment>::const_iterator it = segments.begin(); it != segments.end(); ++it)
-    {
-        const Segment& cluster = *it;
-
-        ed::UUID id;
-        ed::ConvexHull new_chull;
-        geo::Pose3D new_pose;
-
-        // No assignment, so add as new cluster
-        new_chull = cluster.chull;
-        new_pose = cluster.pose;
-
-        // Generate unique ID
-        id = ed::Entity::generateID();
-
-        // Update existence probability
-        update_req_->setExistenceProbability(id, 1); // TODO magic number
-
-        // Set convex hull and pose
-        if (!new_chull.points.empty())
-        {
-            update_req_->setConvexHullNew(id, new_chull, new_pose, rgbd_image->getTimestamp(), rgbd_image->getFrameId());
-        }
-
-        // Set timestamp
-        update_req_->setLastUpdateTimestamp(id, rgbd_image->getTimestamp());
-
-        // Add measurement
-        update_req_->addMeasurement(id, ed::MeasurementConstPtr(new ed::Measurement(rgbd_image, cluster.mask, sensor_pose)));
-
-        res.new_entities.push_back(id.str());
-    }
 
     return true;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-bool RobocupPlugin::srvClassify(ed_robocup::Classify::Request& req,ed_robocup::Classify::Response& res)
+bool RobocupPlugin::srvGetModelImages(ed_robocup::GetModelImages::Request& req, ed_robocup::GetModelImages::Response& res)
 {
+    res.models.resize(models_.size());
+
+    unsigned int i = 0;
+    for(std::map<std::string, EntityModel>::const_iterator it = models_.begin(); it != models_.end(); ++it)
+    {
+        const EntityModel& model = it->second;
+
+        ed_robocup::NamedImage& model_msg = res.models[i];
+        model_msg.name = it->first;
+
+        ImageToMsg(model.model_image, "jpg", model_msg);
+
+        ++i;
+    }
+
     return true;
 }
 

@@ -10,6 +10,7 @@
 
 #include "ed_robocup/FitEntityInImage.h"
 #include "ed_robocup/GetModelImages.h"
+#include <std_srvs/Empty.h>
 
 // Map filtering
 #include "map_filter.h"
@@ -86,6 +87,9 @@ private:
 
     bool srvGetModelImages(ed_robocup::GetModelImages::Request& req, ed_robocup::GetModelImages::Response& res);
 
+    ros::ServiceServer srv_create_walls_;
+
+    bool srvCreateWalls(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
 };
 
 #endif

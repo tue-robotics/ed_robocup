@@ -169,6 +169,7 @@ void RobocupPlugin::initialize(ed::InitData& init)
 
     srv_fit_entity_ = nh.advertiseService("fit_entity_in_image", &RobocupPlugin::srvFitEntityInImage, this);
     srv_get_model_images_ = nh.advertiseService("get_model_images", &RobocupPlugin::srvGetModelImages, this);
+    srv_create_walls_ = nh.advertiseService("create_walls", &RobocupPlugin::srvCreateWalls, this);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -214,6 +215,24 @@ bool RobocupPlugin::srvGetModelImages(ed_robocup::GetModelImages::Request& req, 
 
     return true;
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+bool RobocupPlugin::srvCreateWalls(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
+{
+    geo::ShapeConstPtr shape = map_filter_.createWallShape(wall_height_);
+
+    if (shape)
+    {
+        ed::UUID id = "walls";
+
+        update_req_->setShape(id, shape);
+        update_req_->setPose(id, geo::Pose3D::identity());
+    }
+
+    return true;
+}
+
 
 // ----------------------------------------------------------------------------------------------------
 

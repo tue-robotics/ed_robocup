@@ -2,3 +2,4 @@ string entity_type
 float32 px     # entity pixel location x (pixel.x / image_width) 
 float32 py     # entity pixel location y (pixel.y / image_width)
 ---
+string error_msg    # empty if no error

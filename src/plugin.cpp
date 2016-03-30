@@ -1,6 +1,8 @@
 #include "plugin.h"
 
 #include <rgbd/Image.h>
+#include <rgbd/View.h>
+
 #include <geolib/ros/tf_conversions.h>
 
 #include <ed/update_request.h>
@@ -65,7 +67,7 @@ bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup::N
 
 // ----------------------------------------------------------------------------------------------------
 
-RobocupPlugin::RobocupPlugin() : tf_listener_(0)
+RobocupPlugin::RobocupPlugin()
 {
 }
 
@@ -73,7 +75,6 @@ RobocupPlugin::RobocupPlugin() : tf_listener_(0)
 
 RobocupPlugin::~RobocupPlugin()
 {
-    delete tf_listener_;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -85,7 +86,7 @@ void RobocupPlugin::initialize(ed::InitData& init)
     // Initialize RGBD client
     std::string rgbd_topic;
     if (config.value("rgbd_topic", rgbd_topic))
-        rgbd_client_.intialize(rgbd_topic);
+        image_buffer_.initialize(rgbd_topic);
 
     std::string map_topic_in, map_topic_out;
     if (config.value("map_topic_in", map_topic_in))
@@ -157,8 +158,6 @@ void RobocupPlugin::initialize(ed::InitData& init)
         config.endArray();
     }
 
-    tf_listener_ = new tf::TransformListener;
-
     last_wall_creation_ = ros::Time(0);
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -189,7 +188,71 @@ void RobocupPlugin::process(const ed::PluginInput& data, ed::UpdateRequest& req)
 
 bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& req, ed_robocup::FitEntityInImage::Response& res)
 {
+    rgbd::ImageConstPtr image;
+    geo::Pose3D sensor_pose;
 
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Capture camera image
+
+    if (!image_buffer_.waitForRecentImage("/map", image, sensor_pose, 1.0))
+    {
+        res.error_msg = "Could not capture image";
+        return true;
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Check if model exists
+
+    std::map<std::string, EntityModel>::const_iterator it_model = models_.find(req.entity_type);
+    if (it_model == models_.end())
+    {
+        res.error_msg = "Unknown entity_type: '" + req.entity_type + "'";
+        return true;
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Add object (but with incorrect location)
+
+    std::stringstream error;
+    ed::UUID entity_id = req.entity_type + "-0";
+
+    if (!model_loader_.create(entity_id, req.entity_type, *update_req_, error))
+    {
+        res.error_msg = "Could not spawn entity";
+        return true;
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Set location based on initial click
+
+    int x = req.px * image->getDepthImage().cols;
+    int y = req.py * image->getDepthImage().cols;
+    rgbd::View view(*image, image->getDepthImage().cols);
+
+    geo::Vec3 pos = sensor_pose * (view.getRasterizer().project2Dto3D(x, y) * 3);
+    pos.z = 0;
+
+    geo::Pose3D init_entity_pose(geo::Mat3::identity(), pos);
+
+    update_req_->setPose(entity_id, init_entity_pose);
+
+    ed::WorldModel world_model_tmp = *world_;
+    world_model_tmp.update(*update_req_);
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Update the entity pose using fitting
+
+    FitterData fitter_data;
+    fitter_.processSensorData(*image, sensor_pose, fitter_data);
+
+    geo::Pose3D fitted_pose;
+    if (!fitter_.estimateEntityPose(fitter_data, world_model_tmp, entity_id, init_entity_pose, fitted_pose, 0.5 * M_PI))
+    {
+        res.error_msg = "Could not fit entity";
+        return true;
+    }
+
+    update_req_->setPose(entity_id, fitted_pose);
 
     return true;
 }

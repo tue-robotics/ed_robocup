@@ -4,7 +4,8 @@
 #include <ed/plugin.h>
 #include <ed/types.h>
 
-#include <rgbd/Client.h>
+#include <ed/kinect/image_buffer.h>
+#include <ed/kinect/fitter.h>
 
 #include <tf/transform_listener.h>
 
@@ -45,11 +46,9 @@ private:
 
     // COMMUNICATION
 
-    std::string topic_;
+//    std::string topic_;
 
-    rgbd::Client rgbd_client_;
-
-    tf::TransformListener* tf_listener_;
+    ImageBuffer image_buffer_;
 
     ros::CallbackQueue cb_queue_;
 
@@ -59,6 +58,11 @@ private:
     ed::models::ModelLoader model_loader_;
 
     std::map<std::string, EntityModel> models_;
+
+
+    // FITTING
+
+    Fitter fitter_;
 
 
     // Map fitering

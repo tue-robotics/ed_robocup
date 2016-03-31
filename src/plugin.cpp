@@ -188,6 +188,8 @@ void RobocupPlugin::process(const ed::PluginInput& data, ed::UpdateRequest& req)
 
 bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& req, ed_robocup::FitEntityInImage::Response& res)
 {
+    ROS_INFO("[ED] RobocupPlugin: FitEntityInImage requested");
+
     rgbd::ImageConstPtr image;
     geo::Pose3D sensor_pose;
 
@@ -261,6 +263,8 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
 
 bool RobocupPlugin::srvGetModelImages(ed_robocup::GetModelImages::Request& req, ed_robocup::GetModelImages::Response& res)
 {
+    ROS_INFO("[ED] RobocupPlugin: GetModelImages requested");
+
     res.models.resize(models_.size());
 
     unsigned int i = 0;
@@ -283,6 +287,8 @@ bool RobocupPlugin::srvGetModelImages(ed_robocup::GetModelImages::Request& req, 
 
 bool RobocupPlugin::srvCreateWalls(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
 {
+    ROS_INFO("[ED] RobocupPlugin: CreateWalls requested");
+
     geo::ShapeConstPtr shape = map_filter_.createWallShape(wall_height_);
 
     if (shape)

@@ -15,6 +15,23 @@
 
 // ----------------------------------------------------------------------------------------------------
 
+// Decomposes 'pose' into a (X, Y, YAW) and (Z, ROLL, PITCH) component
+void decomposePose(const geo::Pose3D& pose, geo::Pose3D& pose_xya, geo::Pose3D& pose_zrp)
+{
+    tf::Matrix3x3 m;
+    geo::convert(pose.R, m);
+
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+
+    pose_xya.R.setRPY(0, 0, yaw);
+    pose_xya.t = geo::Vec3(pose.t.x, pose.t.y, 0);
+
+    pose_zrp = pose_xya.inverse() * pose;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup::NamedImage& msg)
 {
     msg.encoding = encoding;
@@ -232,12 +249,25 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
     int y = req.py * image->getDepthImage().rows;
     rgbd::View view(*image, image->getDepthImage().cols);
 
-    geo::Vec3 pos = sensor_pose * (view.getRasterizer().project2Dto3D(x, y) * 3);
-    pos.z = 0;
+    // Decompose the sensor_pose into (x, y, yaw) and (z, roll, pitch)
+    geo::Pose3D sensor_pose_xya, sensor_pose_zrp;
+    decomposePose(sensor_pose, sensor_pose_xya, sensor_pose_zrp);
 
-    geo::Pose3D init_entity_pose(geo::Mat3::identity(), pos);
+    // Estimate based on the pixel of the entity annotation where it is w.r.t.
+    // the sensor
+    geo::Pose3D pose_SENSOR_XYA;
+    pose_SENSOR_XYA.t = geo::Vec3(view.getRasterizer().project2Dto3DX(x), 1, 0);
 
-    update_req_->setPose(entity_id, init_entity_pose);
+    if (req.entity_type == "reo2016/closet" || req.entity_type == "reo2016/couch")
+        pose_SENSOR_XYA.R.setRPY(0, 0, 0 * M_PI);
+    else
+        pose_SENSOR_XYA.R.setRPY(0, 0, 0.5 * M_PI);
+
+    // Calculate the entity pose in map frame
+    geo::Pose3D pose_MAP = sensor_pose_xya * pose_SENSOR_XYA;
+    pose_MAP.t.z = 0;
+
+    update_req_->setPose(entity_id, pose_MAP);
 
     ed::WorldModel world_model_tmp = *world_;
     world_model_tmp.update(*update_req_);
@@ -249,7 +279,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
     fitter_.processSensorData(*image, sensor_pose, fitter_data);
 
     geo::Pose3D fitted_pose;
-    if (!fitter_.estimateEntityPose(fitter_data, world_model_tmp, entity_id, init_entity_pose, fitted_pose, 0.5 * M_PI))
+    if (!fitter_.estimateEntityPose(fitter_data, world_model_tmp, entity_id, pose_MAP, fitted_pose, 0.5 * M_PI))
     {
         res.error_msg = "Could not fit entity";
         return true;

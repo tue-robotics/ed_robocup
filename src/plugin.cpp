@@ -169,6 +169,7 @@ void RobocupPlugin::initialize(ed::InitData& init)
     srv_fit_entity_ = nh.advertiseService("fit_entity_in_image", &RobocupPlugin::srvFitEntityInImage, this);
     srv_get_model_images_ = nh.advertiseService("get_model_images", &RobocupPlugin::srvGetModelImages, this);
     srv_create_walls_ = nh.advertiseService("create_walls", &RobocupPlugin::srvCreateWalls, this);
+    srv_get_image_ = nh.advertiseService("get_image", &RobocupPlugin::srvGetImage, this);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -228,7 +229,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
     // Set location based on initial click
 
     int x = req.px * image->getDepthImage().cols;
-    int y = req.py * image->getDepthImage().cols;
+    int y = req.py * image->getDepthImage().rows;
     rgbd::View view(*image, image->getDepthImage().cols);
 
     geo::Vec3 pos = sensor_pose * (view.getRasterizer().project2Dto3D(x, y) * 3);
@@ -302,6 +303,58 @@ bool RobocupPlugin::srvCreateWalls(std_srvs::Empty::Request& req, std_srvs::Empt
     return true;
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+bool RobocupPlugin::srvGetImage(rgbd::GetRGBD::Request& req, rgbd::GetRGBD::Response& res)
+{
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Check for valid input
+
+    if (req.compression != rgbd::GetRGBD::Request::JPEG && req.compression != rgbd::GetRGBD::Request::PNG)
+    {
+        ROS_ERROR("Invalid compression, only JPEG and PNG are supported (see ENUM in srv definition)");
+        return true;
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Grab camera image
+
+    rgbd::ImageConstPtr image;
+    geo::Pose3D sensor_pose;
+
+    if (!image_buffer_.nextImage("/map", image, sensor_pose))
+    {
+        ROS_ERROR("Could not capture image");
+        return true;
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Draw image on top
+
+    cv::Mat canvas = visualizer_.drawWorldModelOverlay(*world_, *image, sensor_pose);
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Create resized image
+
+    cv::Mat resized_canvas;
+    double ratio_rgb = 1;
+    if (req.width > 0)
+        ratio_rgb = (double) req.width / canvas.cols;
+
+    cv::resize(canvas, resized_canvas, cv::Size(req.width, canvas.rows * ratio_rgb));
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Compress image
+
+    // Compress images
+    std::string compression_str = req.compression == rgbd::GetRGBD::Request::JPEG ? ".jpeg" : ".png";
+    if (cv::imencode(compression_str, resized_canvas, res.rgb_data))
+        return true;
+
+    ROS_ERROR_STREAM("cv::imencode with compression_str " << compression_str << " failed!");
+
+    return true;
+}
 
 // ----------------------------------------------------------------------------------------------------
 

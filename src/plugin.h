@@ -13,11 +13,15 @@
 #include "ed_robocup/GetModelImages.h"
 #include <std_srvs/Empty.h>
 
+#include <rgbd/GetRGBD.h>
+
 // Map filtering
 #include "map_filter.h"
 
 // Model loading
 #include <ed/models/model_loader.h>
+
+#include "visualizer.h"
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -81,6 +85,11 @@ private:
     ed::UpdateRequest* update_req_;
 
 
+    // VISUALIZATION
+
+    Visualizer visualizer_;
+
+
     // SERVICES
 
     ros::ServiceServer srv_fit_entity_;
@@ -94,6 +103,10 @@ private:
     ros::ServiceServer srv_create_walls_;
 
     bool srvCreateWalls(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
+
+    ros::ServiceServer srv_get_image_;
+
+    bool srvGetImage(rgbd::GetRGBD::Request& req, rgbd::GetRGBD::Response& res);
 };
 
 #endif

@@ -190,6 +190,9 @@ void RobocupPlugin::initialize(ed::InitData& init)
     if (config.value("nav_goal_topic", nav_goal_topic))
         navigator_.initialize(nh_global, nav_goal_topic);
 
+    if (!config.value("map_filter_padding", map_filter_padding_, tue::OPTIONAL))
+        map_filter_padding_ = 0.3;
+
     srv_fit_entity_ = nh.advertiseService("fit_entity_in_image", &RobocupPlugin::srvFitEntityInImage, this);
     srv_get_model_images_ = nh.advertiseService("get_model_images", &RobocupPlugin::srvGetModelImages, this);
     srv_create_walls_ = nh.advertiseService("create_walls", &RobocupPlugin::srvCreateWalls, this);
@@ -331,14 +334,14 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
         wm.update(*update_req_);
         ed::EntityConstPtr e = wm.getEntity(entity_id);
 
-        const EntityRepresentation2D* repr2d = fitter_.GetOrCreateEntity2D(e);
-        if (repr2d)
+        EntityRepresentation2D repr2d = fitter_.GetOrCreateEntity2D(e);
+        if (!repr2d.shape_2d.empty())
         {
             geo::Transform2 pose_2d;
             pose_2d.t = geo::Vec2(fitted_pose.t.x, fitted_pose.t.y);
             pose_2d.R = geo::Mat2(fitted_pose.R.xx, fitted_pose.R.xy,
                                   fitted_pose.R.yx, fitted_pose.R.yy);
-            map_filter_.setEntityPose(pose_2d, repr2d->shape_2d, 0.2);
+            map_filter_.setEntityPose(pose_2d, repr2d.shape_2d, map_filter_padding_);
         }
     }
 

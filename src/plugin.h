@@ -78,6 +78,8 @@ private:
 
     MapFilter map_filter_;
 
+    double map_filter_padding_;
+
 
     // NAVIGATION
 

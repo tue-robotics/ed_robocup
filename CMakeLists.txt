@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
     ed_perception
     ed
     rgbd
+    head_ref
 )
 
 # find_package(Boost REQUIRED COMPONENTS system program_options)

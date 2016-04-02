@@ -1,6 +1,7 @@
 #include "navigator.h"
 
 #include <cb_planner_msgs_srvs/LocalPlannerAction.h>
+#include <head_ref/HeadReferenceAction.h>
 
 #include <rgbd/Image.h>
 #include <rgbd/View.h>
@@ -14,28 +15,21 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-void Navigator::initialize(ros::NodeHandle& nh, const std::string& goal_topic)
-{
-    pub_goal_ = nh.advertise<cb_planner_msgs_srvs::LocalPlannerActionGoal>(goal_topic, 1);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-bool Navigator::navigate(const rgbd::Image& image, const geo::Pose3D& sensor_pose, int click_x, int click_y)
+bool getPoint3D(const rgbd::Image& image, int x_depth, int y_depth, geo::Vec3& p_IMAGE)
 {
     const cv::Mat& depth = image.getDepthImage();
 
-    if (click_x < 0 || click_x >= depth.cols || click_y < 0 || click_y >= depth.rows)
+    if (x_depth < 0 || x_depth >= depth.cols || y_depth < 0 || y_depth >= depth.rows)
     {
         return false;
     }
 
-    float d = depth.at<float>(click_y, click_x);
+    float d = depth.at<float>(y_depth, x_depth);
     for(int i = 1; i < 20; ++i)
     {
-        for(int x = click_x - i; x <= click_x + i; ++x)
+        for(int x = x_depth - i; x <= x_depth + i; ++x)
         {
-            for(int y = click_y - i; y <= click_y + i; ++ y)
+            for(int y = y_depth - i; y <= y_depth + i; ++ y)
             {
                 if (x < 0 || y < 0 || x >= depth.cols || y >= depth.rows)
                     continue;
@@ -59,7 +53,25 @@ bool Navigator::navigate(const rgbd::Image& image, const geo::Pose3D& sensor_pos
     }
 
     rgbd::View view(image, depth.cols);
-    geo::Vec3 p_SENSOR = view.getRasterizer().project2Dto3D(click_x, click_y) * d;
+    p_IMAGE = view.getRasterizer().project2Dto3D(x_depth, y_depth) * d;
+    return true;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void Navigator::initialize(ros::NodeHandle& nh, const std::string& nav_goal_topic, const std::string& head_goal_topic)
+{
+    pub_nav_goal_  = nh.advertise<cb_planner_msgs_srvs::LocalPlannerActionGoal>(nav_goal_topic, 1);
+    pub_head_goal_ = nh.advertise<head_ref::HeadReferenceActionGoal>(head_goal_topic, 1);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+bool Navigator::navigate(const rgbd::Image& image, const geo::Pose3D& sensor_pose, int click_x, int click_y)
+{
+    geo::Vec3 p_SENSOR;
+    if (!getPoint3D(image, click_x, click_y, p_SENSOR))
+        return false;
 
     geo::Vec3 p_MAP = sensor_pose * p_SENSOR;
 
@@ -122,9 +134,29 @@ bool Navigator::navigate(const rgbd::Image& image, const geo::Pose3D& sensor_pos
     // -----------------------------------------------------------
     // Publish goal
 
-    pub_goal_.publish(goal_msg);
+    pub_nav_goal_.publish(goal_msg);
 
     return true;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+bool Navigator::moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pose, int click_x, int click_y)
+{
+    geo::Vec3 p_SENSOR;
+    if (!getPoint3D(image, click_x, click_y, p_SENSOR))
+        return false;
+
+    geo::Vec3 p_MAP = sensor_pose * p_SENSOR;
+
+    head_ref::HeadReferenceActionGoal goal_msg;
+    goal_msg.goal.goal_type = head_ref::HeadReferenceGoal::LOOKAT;
+    geo::convert(p_MAP, goal_msg.goal.target_point.point);
+    goal_msg.goal.target_point.header.frame_id = "/map";
+    goal_msg.goal.target_point.header.stamp = ros::Time(image.getTimestamp());
+    goal_msg.goal.priority = 2;
+
+    pub_head_goal_.publish(goal_msg);
 }
 
 // ----------------------------------------------------------------------------------------------------

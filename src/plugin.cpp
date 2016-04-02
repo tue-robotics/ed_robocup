@@ -207,6 +207,26 @@ void RobocupPlugin::process(const ed::PluginInput& data, ed::UpdateRequest& req)
     // Check ROS callback queue
 
     cb_queue_.callAvailable();
+
+    // -------------------------------------
+    // Map filter
+
+    map_filter_.update();
+
+//    if (ros::Time::now() - last_wall_creation_ > ros::Duration(3))
+//    {
+//        geo::ShapeConstPtr shape = map_filter_.createWallShape(wall_height_);
+
+//        if (shape)
+//        {
+//            ed::UUID id = "walls";
+
+//            update_request_->setShape(id, shape);
+//            update_request_->setPose(id, geo::Pose3D::identity());
+//        }
+
+//        last_wall_creation_ = ros::Time::now();
+//    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -305,6 +325,22 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
     }
 
     update_req_->setPose(entity_id, fitted_pose);
+
+    {
+        ed::WorldModel wm = *world_;
+        wm.update(*update_req_);
+        ed::EntityConstPtr e = wm.getEntity(entity_id);
+
+        const EntityRepresentation2D* repr2d = fitter_.GetOrCreateEntity2D(e);
+        if (repr2d)
+        {
+            geo::Transform2 pose_2d;
+            pose_2d.t = geo::Vec2(fitted_pose.t.x, fitted_pose.t.y);
+            pose_2d.R = geo::Mat2(fitted_pose.R.xx, fitted_pose.R.xy,
+                                  fitted_pose.R.yx, fitted_pose.R.yy);
+            map_filter_.setEntityPose(pose_2d, repr2d->shape_2d, 0.2);
+        }
+    }
 
     return true;
 }

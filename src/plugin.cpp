@@ -255,7 +255,6 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
     std::size_t i_slash = req.entity_type.find("/");
     ed::UUID entity_id = req.entity_type.substr(i_slash + 1);
 
-
     if (!model_loader_.create(entity_id, req.entity_type, *update_req_, error))
     {
         res.error_msg = "Could not spawn entity";

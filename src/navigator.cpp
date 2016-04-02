@@ -71,10 +71,6 @@ bool Navigator::navigate(const rgbd::Image& image, const geo::Pose3D& sensor_pos
 
     p_MAP.z = 0;
     geo::Vec3 lookat_dir = (p_MAP - robot_pos).normalized();
-    geo::Vec3 goal_pos = (p_MAP - wanted_dist_to_goal * lookat_dir);
-
-    double dist_to_goal = (goal_pos - robot_pos).length();
-    geo::Vec3 goal_dir = (goal_pos - robot_pos) / dist_to_goal;
 
     // Construct orientation matrix from direction
     geo::Mat3 ori = geo::Mat3::identity();
@@ -86,15 +82,25 @@ bool Navigator::navigate(const rgbd::Image& image, const geo::Pose3D& sensor_pos
     std::vector<geo::Pose3D> path;
     path.push_back(geo::Pose3D(ori, robot_pos));
 
-    double waypoint_dist = 0.1;
-    int num_waypoints = dist_to_goal / waypoint_dist;
-
-    for(int i = 0; i < num_waypoints; ++i)
+    if (false) // For now, only rotate
     {
-        geo::Pose3D& p = path.back();
-        path.push_back(geo::Pose3D(ori, p.t + waypoint_dist * goal_dir));
+        // Create plan for navigation
+
+        geo::Vec3 goal_pos = (p_MAP - wanted_dist_to_goal * lookat_dir);
+
+        double dist_to_goal = (goal_pos - robot_pos).length();
+        geo::Vec3 goal_dir = (goal_pos - robot_pos) / dist_to_goal;
+
+        double waypoint_dist = 0.1;
+        int num_waypoints = dist_to_goal / waypoint_dist;
+
+        for(int i = 0; i < num_waypoints; ++i)
+        {
+            geo::Pose3D& p = path.back();
+            path.push_back(geo::Pose3D(ori, p.t + waypoint_dist * goal_dir));
+        }
+        path.push_back(geo::Pose3D(ori, goal_pos));
     }
-    path.push_back(geo::Pose3D(ori, goal_pos));
 
     // -----------------------------------------------------------
     // Fill goal message

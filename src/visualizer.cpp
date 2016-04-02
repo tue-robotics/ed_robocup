@@ -54,15 +54,31 @@ Visualizer::~Visualizer()
 // ----------------------------------------------------------------------------------------------------
 
 cv::Mat Visualizer::drawWorldModelOverlay(const ed::WorldModel& world, const rgbd::Image& image,
-                                          const geo::Pose3D& sensor_pose)
+                                          const geo::Pose3D& sensor_pose, int image_width)
 {
     std::set<std::string> ignore_ids;
     ignore_ids.insert("floor");
     ignore_ids.insert("walls");
 
-    const cv::Mat& rgb = image.getRGBImage();
+    const cv::Mat& rgb_orig = image.getRGBImage();
 
-    int image_width = rgb.cols;
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Create resized image
+
+    cv::Mat rgb;
+    if (image_width > 0)
+    {
+        double ratio_rgb = (double)image_width / rgb_orig.cols;
+        cv::resize(rgb_orig, rgb, cv::Size(image_width, rgb_orig.rows * ratio_rgb));
+    }
+    else
+    {
+        rgb = rgb_orig.clone();
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    image_width = rgb.cols;
     int image_height = rgb.rows;
 
     rgbd::View view(image, image_width);

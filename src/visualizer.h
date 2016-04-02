@@ -17,7 +17,7 @@ public:
     ~Visualizer();
 
     cv::Mat drawWorldModelOverlay(const ed::WorldModel& world, const rgbd::Image& image,
-                                  const geo::Pose3D& sensor_pose);
+                                  const geo::Pose3D& sensor_pose, int image_width);
 
 private:
 

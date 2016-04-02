@@ -13,6 +13,8 @@
 
 #include <opencv2/highgui/highgui.hpp>
 
+#include "timer.h"
+
 // ----------------------------------------------------------------------------------------------------
 
 // Decomposes 'pose' into a (X, Y, YAW) and (Z, ROLL, PITCH) component
@@ -354,6 +356,8 @@ bool RobocupPlugin::srvCreateWalls(std_srvs::Empty::Request& req, std_srvs::Empt
 
 bool RobocupPlugin::srvGetImage(rgbd::GetRGBD::Request& req, rgbd::GetRGBD::Response& res)
 {
+    Timer timer;
+
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Check for valid input
 
@@ -378,27 +382,23 @@ bool RobocupPlugin::srvGetImage(rgbd::GetRGBD::Request& req, rgbd::GetRGBD::Resp
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Draw image on top
 
-    cv::Mat canvas = visualizer_.drawWorldModelOverlay(*world_, *image, sensor_pose);
-
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // Create resized image
-
-    cv::Mat resized_canvas;
-    double ratio_rgb = 1;
-    if (req.width > 0)
-        ratio_rgb = (double) req.width / canvas.cols;
-
-    cv::resize(canvas, resized_canvas, cv::Size(req.width, canvas.rows * ratio_rgb));
+    cv::Mat canvas = visualizer_.drawWorldModelOverlay(*world_, *image, sensor_pose, req.width);
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Compress image
 
     // Compress images
     std::string compression_str = req.compression == rgbd::GetRGBD::Request::JPEG ? ".jpeg" : ".png";
-    if (cv::imencode(compression_str, resized_canvas, res.rgb_data))
+    if (cv::imencode(compression_str, canvas, res.rgb_data))
+    {
+
+        ROS_INFO_STREAM("[ED] RobocupPlugin: srvGetImage took " << timer.getElapsedTimeInMilliSec()
+                        << " ms, sending " << res.rgb_data.size() << " byte");
         return true;
+    }
 
     ROS_ERROR_STREAM("cv::imencode with compression_str " << compression_str << " failed!");
+
 
     return true;
 }

@@ -180,8 +180,13 @@ void RobocupPlugin::initialize(ed::InitData& init)
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     // Initialize services
+    ros::NodeHandle nh_global;
     ros::NodeHandle nh("~");
     nh.setCallbackQueue(&cb_queue_);
+
+    std::string nav_goal_topic;
+    if (config.value("nav_goal_topic", nav_goal_topic))
+        navigator_.initialize(nh_global, nav_goal_topic);
 
     srv_fit_entity_ = nh.advertiseService("fit_entity_in_image", &RobocupPlugin::srvFitEntityInImage, this);
     srv_get_model_images_ = nh.advertiseService("get_model_images", &RobocupPlugin::srvGetModelImages, this);
@@ -205,7 +210,7 @@ void RobocupPlugin::process(const ed::PluginInput& data, ed::UpdateRequest& req)
 // ----------------------------------------------------------------------------------------------------
 
 bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& req, ed_robocup::FitEntityInImage::Response& res)
-{
+{   
     ROS_INFO("[ED] RobocupPlugin: FitEntityInImage requested");
 
     rgbd::ImageConstPtr image;
@@ -217,6 +222,19 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
     if (!image_buffer_.waitForRecentImage("/map", image, sensor_pose, 1.0))
     {
         res.error_msg = "Could not capture image";
+        return true;
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Determine click location
+
+    int x = req.px * image->getDepthImage().cols;
+    int y = req.py * image->getDepthImage().rows;
+
+    if (req.entity_type == "NAVIGATE" || req.entity_type == "reo2016/workbench")
+    {
+        // Navigate
+        navigator_.navigate(*image, sensor_pose, x, y);
         return true;
     }
 
@@ -245,8 +263,6 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Set location based on initial click
 
-    int x = req.px * image->getDepthImage().cols;
-    int y = req.py * image->getDepthImage().rows;
     rgbd::View view(*image, image->getDepthImage().cols);
 
     // Decompose the sensor_pose into (x, y, yaw) and (z, roll, pitch)

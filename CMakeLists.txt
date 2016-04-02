@@ -60,6 +60,7 @@ add_library(ed_robocup_plugin
     src/plugin.cpp
     src/map_filter.cpp
     src/visualizer.cpp
+    src/navigator.cpp
 )
 target_link_libraries(ed_robocup_plugin ${catkin_LIBRARIES})
 add_dependencies(ed_robocup_plugin ${PROJECT_NAME}_generate_messages_cpp)

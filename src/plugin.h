@@ -21,6 +21,7 @@
 // Model loading
 #include <ed/models/model_loader.h>
 
+#include "navigator.h"
 #include "visualizer.h"
 
 // ----------------------------------------------------------------------------------------------------
@@ -76,6 +77,11 @@ private:
     ros::Time last_wall_creation_;
 
     MapFilter map_filter_;
+
+
+    // NAVIGATION
+
+    Navigator navigator_;
 
 
     // DATA

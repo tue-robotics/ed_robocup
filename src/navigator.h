@@ -16,7 +16,8 @@ public:
 
     bool navigate(const rgbd::Image& image, const geo::Pose3D& sensor_pose, int click_x, int click_y);
 
-    bool moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pose, int click_x, int click_y);
+    bool moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pose,
+                  const ed::WorldModel& world, int click_x, int click_y);
 
 private:
 

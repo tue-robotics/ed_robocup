@@ -260,7 +260,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
     if (req.entity_type == "NAVIGATE")
     {
         // Navigate
-        navigator_.moveHead(*image, sensor_pose, x, y);
+        navigator_.moveHead(*image, sensor_pose, *world_, x, y);
         return true;
     }
 

@@ -154,7 +154,8 @@ bool Navigator::moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pos
     geo::convert(p_MAP, goal_msg.goal.target_point.point);
     goal_msg.goal.target_point.header.frame_id = "/map";
     goal_msg.goal.target_point.header.stamp = ros::Time(image.getTimestamp());
-    goal_msg.goal.priority = 2;
+    goal_msg.goal.tilt_vel = -1;
+    goal_msg.goal.priority = 0;
 
     pub_head_goal_.publish(goal_msg);
 }

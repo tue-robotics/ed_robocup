@@ -156,21 +156,23 @@ bool Navigator::moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pos
 
     // TODO: make this nice
 
-    ed::EntityConstPtr sergio = world.getEntity("sergio");
-    ed::EntityConstPtr amigo = world.getEntity("amigo");
-    if (sergio)
-    {
-        geo::Vec3 p_BASE_LINK = sergio->pose().inverse() * p_MAP;
-        geo::convert(p_BASE_LINK, goal_msg.goal.target_point.point);
-        goal_msg.goal.target_point.header.frame_id = "/sergio/base_link";
-    }
-    else if (amigo)
-    {
-        geo::Vec3 p_BASE_LINK = amigo->pose().inverse() * p_MAP;
-        geo::convert(p_BASE_LINK, goal_msg.goal.target_point.point);
-        goal_msg.goal.target_point.header.frame_id = "/amigo/base_link";
-    }
-    else
+//    ed::EntityConstPtr sergio = world.getEntity("sergio");
+//    ed::EntityConstPtr amigo = world.getEntity("amigo");
+//    if (sergio)
+//    {
+//        std::cout << sergio->pose() << std::endl;
+
+//        geo::Vec3 p_BASE_LINK = sergio->pose().inverse() * p_MAP;
+//        geo::convert(p_BASE_LINK, goal_msg.goal.target_point.point);
+//        goal_msg.goal.target_point.header.frame_id = "/sergio/base_link";
+//    }
+//    else if (amigo)
+//    {
+//        geo::Vec3 p_BASE_LINK = amigo->pose().inverse() * p_MAP;
+//        geo::convert(p_BASE_LINK, goal_msg.goal.target_point.point);
+//        goal_msg.goal.target_point.header.frame_id = "/amigo/base_link";
+//    }
+//    else
     {
         geo::convert(p_MAP, goal_msg.goal.target_point.point);
         goal_msg.goal.target_point.header.frame_id = "/map";

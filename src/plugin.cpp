@@ -302,10 +302,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
     geo::Pose3D pose_SENSOR_XYA;
     pose_SENSOR_XYA.t = geo::Vec3(view.getRasterizer().project2Dto3DX(x), 1, 0);
 
-    if (req.entity_type == "reo2016/closet" || req.entity_type == "reo2016/couch")
-        pose_SENSOR_XYA.R.setRPY(0, 0, 0 * M_PI);
-    else
-        pose_SENSOR_XYA.R.setRPY(0, 0, 0.5 * M_PI);
+    pose_SENSOR_XYA.R.setRPY(0, 0, -0.5 * M_PI); // This assumes estimated entity position is with its x-axis towards camera
 
     // Calculate the entity pose in map frame
     geo::Pose3D pose_MAP = sensor_pose_xya * pose_SENSOR_XYA;

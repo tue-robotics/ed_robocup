@@ -122,8 +122,8 @@ void RobocupPlugin::initialize(ed::InitData& init)
     {
         while(config.nextArrayItem())
         {
-            std::string name;
-            if (!config.value("name", name))
+            std::string id, type;
+            if (!config.value("id", id) | !config.value("type", type))
                 continue;
 
             ed::WorldModel world_model;
@@ -131,26 +131,25 @@ void RobocupPlugin::initialize(ed::InitData& init)
             // Load model data
             ed::UpdateRequest req;
             std::stringstream error;
-            ed::UUID tmp_id = "id";
 
-            if (!model_loader_.create(tmp_id, name, req, error))
+            if (!model_loader_.create(id, type, req, error))
             {
-                ed::log::error() << "While loading model '" << name << "': " << error.str() << std::endl;
+                ed::log::error() << "While loading model '" << type << "': " << error.str() << std::endl;
                 continue;
             }
 
             world_model.update(req);
-            ed::EntityConstPtr entity = world_model.getEntity(tmp_id);
+            ed::EntityConstPtr entity = world_model.getEntity(id);
 
             if (!entity)
             {
-                ed::log::error() << "While loading model '" << name << "': could not load model (this should never happen)" << std::endl;
+                ed::log::error() << "While loading model '" << type << "': could not load model (this should never happen)" << std::endl;
                 continue;
             }
 
             if (!entity->shape())
             {
-                ed::log::error() << "While loading model '" << name << "': model does not have a shape" << std::endl;
+                ed::log::error() << "While loading model '" << type << "': model does not have a shape" << std::endl;
                 continue;
             }
 
@@ -169,9 +168,11 @@ void RobocupPlugin::initialize(ed::InitData& init)
                 model_image = cv::Mat(200, 200, CV_8UC3, cv::Scalar(0, 0, 0));
             }
 
-            EntityModel& model = models_[name];
+            EntityModel& model = models_[id];
             model.entity_prototype = entity;
             model.model_image = model_image;
+            model.type = type;
+            model.id = id;
         }
 
         config.endArray();
@@ -274,14 +275,14 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
         return true;
     }
 
+    const EntityModel& model = it_model->second;
+    ed::UUID entity_id = model.id;
+
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Add object (but with incorrect location)
 
     std::stringstream error;    
-    std::size_t i_slash = req.entity_type.find("/");
-    ed::UUID entity_id = req.entity_type.substr(i_slash + 1);
-
-    if (!model_loader_.create(entity_id, req.entity_type, *update_req_, error))
+    if (!model_loader_.create(entity_id, model.type, *update_req_, error))
     {
         res.error_msg = "Could not spawn entity";
         return true;
@@ -432,8 +433,8 @@ bool RobocupPlugin::srvGetImage(rgbd::GetRGBD::Request& req, rgbd::GetRGBD::Resp
     if (cv::imencode(compression_str, canvas, res.rgb_data))
     {
 
-        ROS_INFO_STREAM("[ED] RobocupPlugin: srvGetImage took " << timer.getElapsedTimeInMilliSec()
-                        << " ms, sending " << res.rgb_data.size() << " byte");
+//        ROS_INFO_STREAM("[ED] RobocupPlugin: srvGetImage took " << timer.getElapsedTimeInMilliSec()
+//                        << " ms, sending " << res.rgb_data.size() << " byte");
         return true;
     }
 

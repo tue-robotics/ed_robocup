@@ -28,6 +28,8 @@
 
 struct EntityModel
 {
+    std::string id;
+    std::string type;
     ed::EntityConstPtr entity_prototype;
     cv::Mat model_image;
 };

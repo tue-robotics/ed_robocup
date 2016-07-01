@@ -71,6 +71,9 @@ private:
 
     Fitter fitter_;
 
+    // Stack with fitted ids used for undoing
+    std::vector<ed::UUID> fitted_ids_;
+
 
     // Map fitering
 

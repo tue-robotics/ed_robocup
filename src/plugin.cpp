@@ -238,13 +238,30 @@ void RobocupPlugin::process(const ed::PluginInput& data, ed::UpdateRequest& req)
 
 bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& req, ed_robocup::FitEntityInImage::Response& res)
 {   
-    ROS_INFO("[ED] RobocupPlugin: FitEntityInImage requested");
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Check for undo
 
-    rgbd::ImageConstPtr image;
-    geo::Pose3D sensor_pose;
+    if (req.undo_latest_fit)
+    {
+        if (fitted_ids_.empty())
+        {
+            res.error_msg = "Nothing to undo";
+            return true;
+        }
+
+        ed::UUID entity_id = fitted_ids_.back();
+        update_req_->removeEntity(entity_id);
+        fitted_ids_.pop_back();
+        return true;
+    }
+
+    ROS_INFO("[ED] RobocupPlugin: FitEntityInImage requested");
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Capture camera image
+
+    rgbd::ImageConstPtr image;
+    geo::Pose3D sensor_pose;
 
     if (!image_buffer_.waitForRecentImage("/map", image, sensor_pose, 1.0))
     {
@@ -343,6 +360,8 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
             map_filter_.setEntityPose(pose_2d, repr2d.shape_2d, map_filter_padding_);
         }
     }
+
+    fitted_ids_.push_back(entity_id);
 
     return true;
 }

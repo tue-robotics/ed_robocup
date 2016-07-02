@@ -179,7 +179,7 @@ bool Navigator::moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pos
     }
 
     goal_msg.goal.target_point.header.stamp = ros::Time(image.getTimestamp());
-    goal_msg.goal.tilt_vel = -1;
+    goal_msg.goal.goal_type = head_ref::HeadReferenceGoal::LOOKAT_AND_FREEZE;
     goal_msg.goal.priority = 0;
 
     pub_head_goal_.publish(goal_msg);

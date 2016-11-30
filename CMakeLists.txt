@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
     ed
     rgbd
     head_ref
+    cb_planner_msgs_srvs
 )
 
 # find_package(Boost REQUIRED COMPONENTS system program_options)

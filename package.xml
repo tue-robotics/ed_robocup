@@ -25,4 +25,6 @@
   <build_depend>head_ref</build_depend>
   <run_depend>head_ref</run_depend>
 
+  <build_depend>cb_planner_msgs_srvs</build_depend>
+  <run_depend>cb_planner_msgs_srvs</run_depend>
 </package>

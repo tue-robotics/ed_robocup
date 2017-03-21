@@ -432,7 +432,7 @@ bool RobocupPlugin::srvGetImage(rgbd::GetRGBD::Request& req, rgbd::GetRGBD::Resp
 
     if (!image_buffer_.nextImage("/map", image, sensor_pose))
     {
-        ROS_ERROR("Could not capture image");
+        ROS_DEBUG("Could not capture image");
         return true;
     }
 

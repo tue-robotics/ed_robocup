@@ -304,6 +304,8 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup_msgs::FitEntityInImage::Reque
         res.error_msg = "Could not spawn entity";
         return true;
     }
+    //Set correct type, so not inheriting from other types
+    update_req_->setType(entity_id, model.type);
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Set location based on initial click

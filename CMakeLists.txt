@@ -2,12 +2,13 @@ cmake_minimum_required(VERSION 2.8.3)
 project(ed_robocup)
 
 find_package(catkin REQUIRED COMPONENTS
+    cb_planner_msgs_srvs
     ed_sensor_integration
     ed_perception
     ed
-    rgbd
     head_ref
-    cb_planner_msgs_srvs
+    nav_msgs
+    rgbd
 )
 
 # find_package(Boost REQUIRED COMPONENTS system program_options)

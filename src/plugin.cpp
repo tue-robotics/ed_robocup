@@ -114,7 +114,7 @@ void RobocupPlugin::initialize(ed::InitData& init)
         map_filter_.initialize(map_topic_in, map_topic_out);
     }
 
-    if (!config.value("wall_height", wall_height_, tue::OPTIONAL))
+    if (!config.value("wall_height", wall_height_, tue::config::OPTIONAL))
         wall_height_ = 0.8;
 
     // Load models (used for fitting)
@@ -155,7 +155,7 @@ void RobocupPlugin::initialize(ed::InitData& init)
 
             cv::Mat model_image;
             std::string image_path;
-            if (config.value("image", image_path, tue::OPTIONAL))
+            if (config.value("image", image_path, tue::config::OPTIONAL))
             {
                 model_image = cv::imread(image_path);
 
@@ -192,7 +192,7 @@ void RobocupPlugin::initialize(ed::InitData& init)
     if (config.value("nav_goal_topic", nav_goal_topic) && config.value("head_goal_topic", head_goal_topic))
         navigator_.initialize(nh_global, nav_goal_topic, head_goal_topic);
 
-    if (!config.value("map_filter_padding", map_filter_padding_, tue::OPTIONAL))
+    if (!config.value("map_filter_padding", map_filter_padding_, tue::config::OPTIONAL))
         map_filter_padding_ = 0.3;
 
     srv_fit_entity_ = nh.advertiseService("fit_entity_in_image", &RobocupPlugin::srvFitEntityInImage, this);

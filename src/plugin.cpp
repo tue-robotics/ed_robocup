@@ -411,14 +411,14 @@ bool RobocupPlugin::srvCreateWalls(std_srvs::Empty::Request& req, std_srvs::Empt
 
 // ----------------------------------------------------------------------------------------------------
 
-bool RobocupPlugin::srvGetImage(rgbd::GetRGBD::Request& req, rgbd::GetRGBD::Response& res)
+bool RobocupPlugin::srvGetImage(rgbd_msgs::GetRGBD::Request& req, rgbd_msgs::GetRGBD::Response& res)
 {
     Timer timer;
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Check for valid input
 
-    if (req.compression != rgbd::GetRGBD::Request::JPEG && req.compression != rgbd::GetRGBD::Request::PNG)
+    if (req.compression != rgbd_msgs::GetRGBD::Request::JPEG && req.compression != rgbd_msgs::GetRGBD::Request::PNG)
     {
         ROS_ERROR("Invalid compression, only JPEG and PNG are supported (see ENUM in srv definition)");
         return true;
@@ -445,7 +445,7 @@ bool RobocupPlugin::srvGetImage(rgbd::GetRGBD::Request& req, rgbd::GetRGBD::Resp
     // Compress image
 
     // Compress images
-    std::string compression_str = req.compression == rgbd::GetRGBD::Request::JPEG ? ".jpeg" : ".png";
+    std::string compression_str = req.compression == rgbd_msgs::GetRGBD::Request::JPEG ? ".jpeg" : ".png";
     if (cv::imencode(compression_str, canvas, res.rgb_data))
     {
 

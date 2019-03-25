@@ -13,7 +13,7 @@
 #include "ed_robocup/GetModelImages.h"
 #include <std_srvs/Empty.h>
 
-#include <rgbd/GetRGBD.h>
+#include <rgbd_msgs/GetRGBD.h>
 
 // Map filtering
 #include "map_filter.h"
@@ -119,7 +119,7 @@ private:
 
     ros::ServiceServer srv_get_image_;
 
-    bool srvGetImage(rgbd::GetRGBD::Request& req, rgbd::GetRGBD::Response& res);
+    bool srvGetImage(rgbd_msgs::GetRGBD::Request& req, rgbd_msgs::GetRGBD::Response& res);
 };
 
 #endif

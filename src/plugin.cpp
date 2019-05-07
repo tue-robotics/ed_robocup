@@ -132,7 +132,7 @@ void RobocupPlugin::initialize(ed::InitData& init)
             ed::UpdateRequest req;
             std::stringstream error;
 
-            if (!model_loader_.create(id, type, req, error))
+            if (!model_loader_.create(id, type, req, error, true))
             {
                 ed::log::error() << "While loading model '" << type << "': " << error.str() << std::endl;
                 continue;

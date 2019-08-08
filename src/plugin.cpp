@@ -299,7 +299,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
     // Add object (but with incorrect location)
 
     std::stringstream error;    
-    if (!model_loader_.create(entity_id, model.type, *update_req_, error))
+    if (!model_loader_.create(entity_id, model.type, *update_req_, error, true))
     {
         res.error_msg = "Could not spawn entity";
         return true;

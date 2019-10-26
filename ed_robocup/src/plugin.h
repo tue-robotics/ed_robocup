@@ -9,8 +9,8 @@
 
 #include <tf/transform_listener.h>
 
-#include "ed_robocup/FitEntityInImage.h"
-#include "ed_robocup/GetModelImages.h"
+#include "ed_robocup_msgs/FitEntityInImage.h"
+#include "ed_robocup_msgs/GetModelImages.h"
 #include <std_srvs/Empty.h>
 
 #include <rgbd_msgs/GetRGBD.h>
@@ -107,11 +107,11 @@ private:
 
     ros::ServiceServer srv_fit_entity_;
 
-    bool srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& req, ed_robocup::FitEntityInImage::Response& res);
+    bool srvFitEntityInImage(ed_robocup_msgs::FitEntityInImage::Request& req, ed_robocup_msgs::FitEntityInImage::Response& res);
 
     ros::ServiceServer srv_get_model_images_;
 
-    bool srvGetModelImages(ed_robocup::GetModelImages::Request& req, ed_robocup::GetModelImages::Response& res);
+    bool srvGetModelImages(ed_robocup_msgs::GetModelImages::Request& req, ed_robocup_msgs::GetModelImages::Response& res);
 
     ros::ServiceServer srv_create_walls_;
 

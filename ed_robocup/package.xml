@@ -12,8 +12,11 @@
 
   <depend>cb_planner_msgs_srvs</depend>
   <depend>ed</depend>
+  <depend>ed_robocup_msgs</depend>
   <depend>ed_sensor_integration</depend>
   <depend>head_ref</depend>
   <depend>nav_msgs</depend>
   <depend>rgbd</depend>
+  <depend>rgbd_msgs</depend>
+
 </package>

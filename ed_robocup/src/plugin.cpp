@@ -57,7 +57,7 @@ bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup_ms
         std::vector<int> rgb_params;
         rgb_params.resize(3, 0);
 
-        rgb_params[0] = CV_IMWRITE_JPEG_QUALITY;
+        rgb_params[0] = cv::IMWRITE_JPEG_QUALITY;
         rgb_params[1] = 50; // default is 95
 
         // Compress image
@@ -72,7 +72,7 @@ bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup_ms
         std::vector<int> params;
         params.resize(3, 0);
 
-        params[0] = CV_IMWRITE_PNG_COMPRESSION;
+        params[0] = cv::IMWRITE_PNG_COMPRESSION;
         params[1] = 1;
 
         if (!cv::imencode(".png", rgb_image, msg.data, params)) {
@@ -132,7 +132,7 @@ void RobocupPlugin::initialize(ed::InitData& init)
             ed::UpdateRequest req;
             std::stringstream error;
 
-            if (!model_loader_.create(id, type, req, error))
+            if (!model_loader_.create(id, type, req, error, true))
             {
                 ed::log::error() << "While loading model '" << type << "': " << error.str() << std::endl;
                 continue;
@@ -299,7 +299,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup_msgs::FitEntityInImage::Reque
     // Add object (but with incorrect location)
 
     std::stringstream error;    
-    if (!model_loader_.create(entity_id, model.type, *update_req_, error))
+    if (!model_loader_.create(entity_id, model.type, *update_req_, error, true))
     {
         res.error_msg = "Could not spawn entity";
         return true;

@@ -34,7 +34,7 @@ void decomposePose(const geo::Pose3D& pose, geo::Pose3D& pose_xya, geo::Pose3D& 
 
 // ----------------------------------------------------------------------------------------------------
 
-bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup::NamedImage& msg)
+bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup_msgs::NamedImage& msg)
 {
     msg.encoding = encoding;
 
@@ -236,7 +236,7 @@ void RobocupPlugin::process(const ed::PluginInput& data, ed::UpdateRequest& req)
 
 // ----------------------------------------------------------------------------------------------------
 
-bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& req, ed_robocup::FitEntityInImage::Response& res)
+bool RobocupPlugin::srvFitEntityInImage(ed_robocup_msgs::FitEntityInImage::Request& req, ed_robocup_msgs::FitEntityInImage::Response& res)
 {   
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Check for undo
@@ -368,7 +368,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup::FitEntityInImage::Request& r
 
 // ----------------------------------------------------------------------------------------------------
 
-bool RobocupPlugin::srvGetModelImages(ed_robocup::GetModelImages::Request& req, ed_robocup::GetModelImages::Response& res)
+bool RobocupPlugin::srvGetModelImages(ed_robocup_msgs::GetModelImages::Request& req, ed_robocup_msgs::GetModelImages::Response& res)
 {
     ROS_INFO("[ED] RobocupPlugin: GetModelImages requested");
 
@@ -379,7 +379,7 @@ bool RobocupPlugin::srvGetModelImages(ed_robocup::GetModelImages::Request& req, 
     {
         const EntityModel& model = it->second;
 
-        ed_robocup::NamedImage& model_msg = res.models[i];
+        ed_robocup_msgs::NamedImage& model_msg = res.models[i];
         model_msg.name = it->first;
 
         ImageToMsg(model.model_image, "jpg", model_msg);
@@ -411,14 +411,14 @@ bool RobocupPlugin::srvCreateWalls(std_srvs::Empty::Request& req, std_srvs::Empt
 
 // ----------------------------------------------------------------------------------------------------
 
-bool RobocupPlugin::srvGetImage(rgbd::GetRGBD::Request& req, rgbd::GetRGBD::Response& res)
+bool RobocupPlugin::srvGetImage(rgbd_msgs::GetRGBD::Request& req, rgbd_msgs::GetRGBD::Response& res)
 {
     Timer timer;
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Check for valid input
 
-    if (req.compression != rgbd::GetRGBD::Request::JPEG && req.compression != rgbd::GetRGBD::Request::PNG)
+    if (req.compression != rgbd_msgs::GetRGBD::Request::JPEG && req.compression != rgbd_msgs::GetRGBD::Request::PNG)
     {
         ROS_ERROR("Invalid compression, only JPEG and PNG are supported (see ENUM in srv definition)");
         return true;
@@ -445,7 +445,7 @@ bool RobocupPlugin::srvGetImage(rgbd::GetRGBD::Request& req, rgbd::GetRGBD::Resp
     // Compress image
 
     // Compress images
-    std::string compression_str = req.compression == rgbd::GetRGBD::Request::JPEG ? ".jpeg" : ".png";
+    std::string compression_str = req.compression == rgbd_msgs::GetRGBD::Request::JPEG ? ".jpeg" : ".png";
     if (cv::imencode(compression_str, canvas, res.rgb_data))
     {
 

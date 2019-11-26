@@ -1,7 +1,7 @@
 #include "navigator.h"
 
 #include <cb_planner_msgs_srvs/LocalPlannerAction.h>
-#include <head_ref/HeadReferenceAction.h>
+#include <head_ref_msgs/HeadReferenceAction.h>
 
 #include <rgbd/Image.h>
 #include <rgbd/View.h>
@@ -62,7 +62,7 @@ bool getPoint3D(const rgbd::Image& image, int x_depth, int y_depth, geo::Vec3& p
 void Navigator::initialize(ros::NodeHandle& nh, const std::string& nav_goal_topic, const std::string& head_goal_topic)
 {
     pub_nav_goal_  = nh.advertise<cb_planner_msgs_srvs::LocalPlannerActionGoal>(nav_goal_topic, 1);
-    pub_head_goal_ = nh.advertise<head_ref::HeadReferenceActionGoal>(head_goal_topic, 1);
+    pub_head_goal_ = nh.advertise<head_ref_msgs::HeadReferenceActionGoal>(head_goal_topic, 1);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -150,8 +150,8 @@ bool Navigator::moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pos
 
     geo::Vec3 p_MAP = sensor_pose * p_SENSOR;
 
-    head_ref::HeadReferenceActionGoal goal_msg;
-    goal_msg.goal.goal_type = head_ref::HeadReferenceGoal::LOOKAT;
+    head_ref_msgs::HeadReferenceActionGoal goal_msg;
+    goal_msg.goal.goal_type = head_ref_msgs::HeadReferenceGoal::LOOKAT;
 
 
     // TODO: make this nice
@@ -179,7 +179,7 @@ bool Navigator::moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pos
     }
 
     goal_msg.goal.target_point.header.stamp = ros::Time(image.getTimestamp());
-    goal_msg.goal.goal_type = head_ref::HeadReferenceGoal::LOOKAT_AND_FREEZE;
+    goal_msg.goal.goal_type = head_ref_msgs::HeadReferenceGoal::LOOKAT_AND_FREEZE;
     goal_msg.goal.priority = 0;
 
     pub_head_goal_.publish(goal_msg);

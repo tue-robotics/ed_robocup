@@ -1,5 +1,5 @@
-#ifndef ED_SENSOR_INTEGRATION_FITTER_MAP_FILTER_H_
-#define ED_SENSOR_INTEGRATION_FITTER_MAP_FILTER_H_
+#ifndef ED_ROBOCUP_MAP_FILTER_H_
+#define ED_ROBOCUP_MAP_FILTER_H_
 
 #include <geolib/datatypes.h>
 
@@ -55,4 +55,4 @@ private:
 
 };
 
-#endif
+#endif // ED_ROBOCUP_MAP_FILTER_H_

@@ -3,8 +3,8 @@
 #include <cb_planner_msgs_srvs/LocalPlannerAction.h>
 #include <head_ref_msgs/HeadReferenceAction.h>
 
-#include <rgbd/Image.h>
-#include <rgbd/View.h>
+#include <rgbd/image.h>
+#include <rgbd/view.h>
 
 #include <ed/entity.h>
 #include <ed/world_model.h>

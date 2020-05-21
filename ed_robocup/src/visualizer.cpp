@@ -1,7 +1,7 @@
 #include "visualizer.h"
 
-#include <rgbd/Image.h>
-#include <rgbd/View.h>
+#include <rgbd/image.h>
+#include <rgbd/view.h>
 
 #include <ed/world_model.h>
 #include <ed/entity.h>

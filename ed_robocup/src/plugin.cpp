@@ -1,7 +1,7 @@
 #include "plugin.h"
 
-#include <rgbd/Image.h>
-#include <rgbd/View.h>
+#include <rgbd/image.h>
+#include <rgbd/view.h>
 
 #include <geolib/ros/tf_conversions.h>
 

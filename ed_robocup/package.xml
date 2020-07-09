@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model
+  href="http://download.ros.org/schema/package_format3.xsd"
+  schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>ed_robocup</name>
   <version>0.0.0</version>
   <description>No description available</description>
@@ -10,7 +13,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>cb_planner_msgs_srvs</depend>
+  <depend>cb_base_navigation_msgs</depend>
   <depend>ed</depend>
   <depend>ed_robocup_msgs</depend>
   <depend>ed_sensor_integration</depend>

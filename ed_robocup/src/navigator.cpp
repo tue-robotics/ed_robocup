@@ -1,6 +1,6 @@
 #include "navigator.h"
 
-#include <cb_planner_msgs_srvs/LocalPlannerAction.h>
+#include <cb_base_navigation_msgs/LocalPlannerAction.h>
 #include <head_ref_msgs/HeadReferenceAction.h>
 
 #include <rgbd/image.h>
@@ -61,7 +61,7 @@ bool getPoint3D(const rgbd::Image& image, int x_depth, int y_depth, geo::Vec3& p
 
 void Navigator::initialize(ros::NodeHandle& nh, const std::string& nav_goal_topic, const std::string& head_goal_topic)
 {
-    pub_nav_goal_  = nh.advertise<cb_planner_msgs_srvs::LocalPlannerActionGoal>(nav_goal_topic, 1);
+    pub_nav_goal_  = nh.advertise<cb_base_navigation_msgs::LocalPlannerActionGoal>(nav_goal_topic, 1);
     pub_head_goal_ = nh.advertise<head_ref_msgs::HeadReferenceActionGoal>(head_goal_topic, 1);
 }
 
@@ -118,7 +118,7 @@ bool Navigator::navigate(const rgbd::Image& image, const geo::Pose3D& sensor_pos
     // Fill goal message
 
     // orientation
-    cb_planner_msgs_srvs::LocalPlannerActionGoal goal_msg;
+    cb_base_navigation_msgs::LocalPlannerActionGoal goal_msg;
     goal_msg.goal.orientation_constraint.frame = "/map";
 
     geo::convert(p_MAP, goal_msg.goal.orientation_constraint.look_at);

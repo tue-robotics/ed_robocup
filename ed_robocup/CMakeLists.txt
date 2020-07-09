@@ -5,7 +5,7 @@ project(ed_robocup)
 add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
-    cb_planner_msgs_srvs
+    cb_base_navigation_msgs
     ed
     ed_robocup_msgs
     ed_sensor_integration
@@ -36,5 +36,5 @@ add_library(ed_robocup_plugin
     src/navigator.cpp
 )
 target_link_libraries(ed_robocup_plugin ${catkin_LIBRARIES})
-add_dependencies(ed_robocup_plugin ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(ed_robocup_plugin ${catkin_EXPORTED_TARGETS})
 

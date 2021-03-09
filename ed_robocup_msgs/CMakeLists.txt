@@ -3,7 +3,6 @@ project(ed_robocup_msgs)
 
 find_package(catkin REQUIRED COMPONENTS
   message_generation
-  std_msgs
 )
 
 # ------------------------------------------------------------------------------------------------
@@ -25,9 +24,9 @@ add_service_files(
 
 # Generate added messages and services with any dependencies listed here
 generate_messages(
-  DEPENDENCIES std_msgs
+  DEPENDENCIES
 )
 
 catkin_package(
-  CATKIN_DEPENDS message_runtime std_msgs
+  CATKIN_DEPENDS message_runtime
 )

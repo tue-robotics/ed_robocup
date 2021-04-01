@@ -237,7 +237,7 @@ void RobocupPlugin::process(const ed::PluginInput& data, ed::UpdateRequest& req)
 // ----------------------------------------------------------------------------------------------------
 
 bool RobocupPlugin::srvFitEntityInImage(ed_robocup_msgs::FitEntityInImage::Request& req, ed_robocup_msgs::FitEntityInImage::Response& res)
-{   
+{
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Check for undo
 
@@ -263,7 +263,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup_msgs::FitEntityInImage::Reque
     rgbd::ImageConstPtr image;
     geo::Pose3D sensor_pose;
 
-    if (!image_buffer_.waitForRecentImage("/map", image, sensor_pose, 1.0))
+    if (!image_buffer_.waitForRecentImage("map", image, sensor_pose, 1.0))
     {
         res.error_msg = "Could not capture image";
         return true;
@@ -298,7 +298,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup_msgs::FitEntityInImage::Reque
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Add object (but with incorrect location)
 
-    std::stringstream error;    
+    std::stringstream error;
     if (!model_loader_.create(entity_id, model.type, *update_req_, error, true))
     {
         res.error_msg = "Could not spawn entity";
@@ -430,7 +430,7 @@ bool RobocupPlugin::srvGetImage(rgbd_msgs::GetRGBD::Request& req, rgbd_msgs::Get
     rgbd::ImageConstPtr image;
     geo::Pose3D sensor_pose;
 
-    if (!image_buffer_.nextImage("/map", image, sensor_pose))
+    if (!image_buffer_.nextImage("map", image, sensor_pose))
     {
         ROS_DEBUG("Could not capture image");
         return true;

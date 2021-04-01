@@ -183,6 +183,8 @@ bool Navigator::moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pos
     goal_msg.goal.priority = 0;
 
     pub_head_goal_.publish(goal_msg);
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------------------------------

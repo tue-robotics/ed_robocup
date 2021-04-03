@@ -119,7 +119,7 @@ bool Navigator::navigate(const rgbd::Image& image, const geo::Pose3D& sensor_pos
 
     // orientation
     cb_base_navigation_msgs::LocalPlannerActionGoal goal_msg;
-    goal_msg.goal.orientation_constraint.frame = "/map";
+    goal_msg.goal.orientation_constraint.frame = "map";
 
     geo::convert(p_MAP, goal_msg.goal.orientation_constraint.look_at);
 
@@ -128,7 +128,7 @@ bool Navigator::navigate(const rgbd::Image& image, const geo::Pose3D& sensor_pos
     for(unsigned int i = 0; i < path.size(); ++i)
     {
         geo::convert(path[i], goal_msg.goal.plan[i].pose);
-        goal_msg.goal.plan[i].header.frame_id = "/map";
+        goal_msg.goal.plan[i].header.frame_id = "map";
     }
 
     // -----------------------------------------------------------
@@ -175,7 +175,7 @@ bool Navigator::moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pos
 //    else
     {
         geo::convert(p_MAP, goal_msg.goal.target_point.point);
-        goal_msg.goal.target_point.header.frame_id = "/map";
+        goal_msg.goal.target_point.header.frame_id = "map";
     }
 
     goal_msg.goal.target_point.header.stamp = ros::Time(image.getTimestamp());
@@ -183,6 +183,8 @@ bool Navigator::moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pos
     goal_msg.goal.priority = 0;
 
     pub_head_goal_.publish(goal_msg);
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------------------------------

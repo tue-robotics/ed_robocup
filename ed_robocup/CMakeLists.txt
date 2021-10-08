@@ -35,3 +35,10 @@ add_library(ed_robocup_plugin
 target_link_libraries(ed_robocup_plugin ${catkin_LIBRARIES})
 add_dependencies(ed_robocup_plugin ${catkin_EXPORTED_TARGETS})
 
+add_library(ed_gui_plugin
+    src/gui_plugin.cpp
+    src/visualizer.cpp
+    src/navigator.cpp
+)
+target_link_libraries(ed_gui_plugin ${catkin_LIBRARIES})
+add_dependencies(ed_gui_plugin ${catkin_EXPORTED_TARGETS})

@@ -26,14 +26,12 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
 )
 
-add_library(ed_robocup_plugin
-    src/plugin.cpp
+add_library(ed_map_plugin
+    src/map_plugin.cpp
     src/map_filter.cpp
-    src/visualizer.cpp
-    src/navigator.cpp
 )
-target_link_libraries(ed_robocup_plugin ${catkin_LIBRARIES})
-add_dependencies(ed_robocup_plugin ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ed_map_plugin ${catkin_LIBRARIES})
+add_dependencies(ed_map_plugin ${catkin_EXPORTED_TARGETS})
 
 add_library(ed_gui_plugin
     src/gui_plugin.cpp

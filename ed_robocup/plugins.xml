@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <class_libraries>
   <library path="lib/libed_robocup_plugin">
-    <class type="RobocupPlugin" base_class_type="ed::Plugin">
+    <class name="ed_robocup/robocup" type="RobocupPlugin" base_class_type="ed::Plugin">
       <description>RobocupPlugin</description>
     </class>
   </library>

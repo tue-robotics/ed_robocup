@@ -22,4 +22,8 @@
   <depend>rgbd</depend>
   <depend>rgbd_msgs</depend>
 
+  <export>
+    <ed plugin="${prefix}/plugins.xml" />
+  </export>
+
 </package>

@@ -19,7 +19,7 @@ public:
 
     SimpleRenderResult(cv::Mat& z_buffer_, cv::Mat& entity_index_map_)
         : geo::RenderResult(z_buffer_.cols, z_buffer_.rows), z_buffer(z_buffer_),
-          entity_index_map(entity_index_map_), in_view(false) {}
+          entity_index_map(entity_index_map_) {}
 
     void renderPixel(int x, int y, float depth, int i_triangle)
     {
@@ -28,14 +28,12 @@ public:
         {
             z_buffer.at<float>(y, x) = depth;
             entity_index_map.at<int>(y, x) = i_entity;
-            in_view = true;
         }
     }
 
     cv::Mat& z_buffer;
     int i_entity;
     cv::Mat& entity_index_map;
-    bool in_view;
 
 };
 
@@ -89,7 +87,6 @@ cv::Mat Visualizer::drawWorldModelOverlay(const ed::WorldModel& world, const rgb
     SimpleRenderResult res(depth_render, entity_index_map);
 
     int i_entity = 0;
-    res.in_view = false;
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Render depth image based on world model

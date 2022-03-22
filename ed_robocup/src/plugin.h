@@ -53,8 +53,6 @@ private:
 
     // COMMUNICATION
 
-//    std::string topic_;
-
     ImageBuffer image_buffer_;
 
     ros::CallbackQueue cb_queue_;

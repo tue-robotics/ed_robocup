@@ -105,7 +105,7 @@ void RobocupPlugin::initialize(ed::InitData& init)
     // Initialize RGBD client
     std::string rgbd_topic;
     if (config.value("rgbd_topic", rgbd_topic))
-        image_buffer_.initialize(rgbd_topic);
+        image_buffer_.initialize(rgbd_topic, "map");
 
     std::string map_topic_in, map_topic_out;
     if (config.value("map_topic_in", map_topic_in))
@@ -263,7 +263,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup_msgs::FitEntityInImage::Reque
     rgbd::ImageConstPtr image;
     geo::Pose3D sensor_pose;
 
-    if (!image_buffer_.waitForRecentImage("map", image, sensor_pose, 1.0))
+    if (!image_buffer_.waitForRecentImage(image, sensor_pose, 1.0))
     {
         res.error_msg = "Could not capture image";
         return true;
@@ -430,7 +430,7 @@ bool RobocupPlugin::srvGetImage(rgbd_msgs::GetRGBD::Request& req, rgbd_msgs::Get
     rgbd::ImageConstPtr image;
     geo::Pose3D sensor_pose;
 
-    if (!image_buffer_.nextImage("map", image, sensor_pose))
+    if (!image_buffer_.nextImage(image, sensor_pose))
     {
         ROS_DEBUG("Could not capture image");
         return true;

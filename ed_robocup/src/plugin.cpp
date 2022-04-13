@@ -333,6 +333,11 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup_msgs::FitEntityInImage::Reque
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Update the entity pose using fitting
 
+    if (!fitter_.isConfigured())
+    {
+        fitter_.configureBeamModel(image->getCameraModel());
+    }
+
     FitterData fitter_data;
     fitter_.processSensorData(*image, sensor_pose, fitter_data);
 

@@ -373,7 +373,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup_msgs::FitEntityInImage::Reque
 
 // ----------------------------------------------------------------------------------------------------
 
-bool RobocupPlugin::srvGetModelImages(ed_robocup_msgs::GetModelImages::Request& req, ed_robocup_msgs::GetModelImages::Response& res)
+bool RobocupPlugin::srvGetModelImages(ed_robocup_msgs::GetModelImages::Request& /*req*/, ed_robocup_msgs::GetModelImages::Response& res)
 {
     ROS_INFO("[ED] RobocupPlugin: GetModelImages requested");
 
@@ -397,7 +397,7 @@ bool RobocupPlugin::srvGetModelImages(ed_robocup_msgs::GetModelImages::Request& 
 
 // ----------------------------------------------------------------------------------------------------
 
-bool RobocupPlugin::srvCreateWalls(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
+bool RobocupPlugin::srvCreateWalls(std_srvs::Empty::Request& /*req*/, std_srvs::Empty::Response& /*res*/)
 {
     ROS_INFO("[ED] RobocupPlugin: CreateWalls requested");
 

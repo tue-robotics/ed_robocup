@@ -142,7 +142,7 @@ bool Navigator::navigate(const rgbd::Image& image, const geo::Pose3D& sensor_pos
 // ----------------------------------------------------------------------------------------------------
 
 bool Navigator::moveHead(const rgbd::Image& image, const geo::Pose3D& sensor_pose,
-                         const ed::WorldModel& world, int click_x, int click_y)
+                         const ed::WorldModel& /*world*/, int click_x, int click_y)
 {
     geo::Vec3 p_SENSOR;
     if (!getPoint3D(image, click_x, click_y, p_SENSOR))

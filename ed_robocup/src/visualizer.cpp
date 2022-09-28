@@ -21,7 +21,7 @@ public:
         : geo::RenderResult(z_buffer_.cols, z_buffer_.rows), z_buffer(z_buffer_),
           entity_index_map(entity_index_map_) {}
 
-    void renderPixel(int x, int y, float depth, int i_triangle)
+    void renderPixel(int x, int y, float depth, int /*i_triangle*/)
     {
         float old_depth = z_buffer.at<float>(y, x);
         if (old_depth == 0 || depth < old_depth)

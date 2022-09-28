@@ -45,7 +45,7 @@ void MapFilter::gridToWorld(int mx, int my, double& x, double& y)
 void MapFilter::setEntityPose(const geo::Transform2& pose, const std::vector<std::vector<geo::Vec2> >& contours,
                               double obstacle_inflation)
 {
-    std::cout << "MapFilter::setEntityPose" << std::endl;
+    ROS_DEBUG("MapFilter::setEntityPose");
 
     if (!mask_.data)
         return;
@@ -100,7 +100,7 @@ void MapFilter::update()
 
     send_update_ = false;
 
-    std::cout << "[ED FITTER] Received new map or had an updated entity pose!" << std::endl;
+    ROS_DEBUG_STREAM("[ROBOCUP] Received new map or had an updated entity pose!");
 
     unsigned int w = map_in_->info.width;
     unsigned int h = map_in_->info.height;
@@ -123,7 +123,7 @@ void MapFilter::update()
             int dx = (map_origin_.x - map_in_->info.origin.position.x) / res_;
             int dy = (map_origin_.y - map_in_->info.origin.position.y) / res_;
 
-            std::cout << "dx = " << dx << ", dy = " << dy << std::endl;
+            ROS_DEBUG_STREAM("[ROBOCUP] resizing: dx=" << dx << ", dy=" << dy);
 
             int w_new = std::max<int>(dx + mask_.cols, w) + 1;
             int h_new = std::max<int>(dy + mask_.rows, h) + 1;
@@ -138,8 +138,8 @@ void MapFilter::update()
                 }
             }
 
-            std::cout << "old mask size: " << mask_.cols << " x " << mask_.rows << std::endl;
-            std::cout << "new mask size: " << new_mask.cols << " x " << new_mask.rows << std::endl;
+            ROS_DEBUG_STREAM("[ROBOCUP] resizing: old mask size:" << mask_.cols << " x " << mask_.rows);
+            ROS_DEBUG_STREAM("[ROBOCUP] resizing: new mask size:" << new_mask.cols << " x " << new_mask.rows);
 
 //            cv::Mat roi = new_mask(cv::Rect(cv::Point(dx, dy), cv::Point(mask_.cols, mask_.rows)));
 //            mask_.copyTo(roi);
@@ -151,7 +151,7 @@ void MapFilter::update()
 
             mask_ = new_mask;
 
-            std::cout << "Done!" << std::endl;
+            ROS_DEBUG_STREAM("[ROBOCUP] resizing done");
         }
     }
 
@@ -210,7 +210,7 @@ geo::ShapeConstPtr MapFilter::createWallShape(double height)
 
     // ------------------------------------------------------------------------------------------
 
-    std::cout << "Walls have: " << shape->getMesh().getTriangleIs().size() << " triangles" << std::endl;
+    ROS_DEBUG_STREAM("Walls have: " << shape->getMesh().getTriangleIs().size() << " triangles");
 
     return shape;
 }

@@ -63,7 +63,7 @@ bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup_ms
         // Compress image
         if (!cv::imencode(".jpg", rgb_image, msg.data, rgb_params))
         {
-            std::cout << "RGB image compression failed" << std::endl;
+            ROS_ERROR("[ROBOCUP] RGB image compression failed");
             return false;
         }
     }
@@ -76,7 +76,7 @@ bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup_ms
         params[1] = 1;
 
         if (!cv::imencode(".png", rgb_image, msg.data, params)) {
-            std::cout << "PNG image compression failed" << std::endl;
+            ROS_ERROR("[ROBOCUP] PNG image compression failed");
             return false;
         }
     }

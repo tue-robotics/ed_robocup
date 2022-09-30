@@ -43,7 +43,7 @@ bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup_ms
     {
         // depth image
         rgb_image = cv::Mat(image.rows, image.cols, CV_8UC3, cv::Scalar(0, 0, 0));
-        for(unsigned int i = 0; i < rgb_image.rows * rgb_image.cols; ++i)
+        for(unsigned int i = 0; i < static_cast<uint>(rgb_image.rows) * static_cast<uint>(rgb_image.cols); ++i)
             rgb_image.at<cv::Vec3b>(i) = (image.at<float>(i) / 10) * cv::Vec3b(255, 255, 255);
     }
     else

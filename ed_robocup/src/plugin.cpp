@@ -123,7 +123,7 @@ void RobocupPlugin::initialize(ed::InitData& init)
         while(config.nextArrayItem())
         {
             std::string id, type;
-            if (!config.value("id", id) | !config.value("type", type))
+            if (!config.value("id", id) || !config.value("type", type))
                 continue;
 
             ed::WorldModel world_model;

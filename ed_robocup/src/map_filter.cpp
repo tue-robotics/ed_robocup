@@ -45,7 +45,7 @@ void MapFilter::gridToWorld(int mx, int my, double& x, double& y)
 void MapFilter::setEntityPose(const geo::Transform2& pose, const std::vector<std::vector<geo::Vec2> >& contours,
                               double obstacle_inflation)
 {
-    std::cout << "MapFilter::setEntityPose" << std::endl;
+    ROS_DEBUG("MapFilter::setEntityPose");
 
     if (!mask_.data)
         return;
@@ -56,7 +56,7 @@ void MapFilter::setEntityPose(const geo::Transform2& pose, const std::vector<std
     {
         const std::vector<geo::Vec2>& contour = *it;
         std::vector<cv::Point> points(contour.size());
-        for(unsigned int i = 0; i < contour.size(); ++i)
+        for (uint i = 0; i < contour.size(); ++i)
         {
             geo::Vec2 p_MAP = pose * contour[i];
 
@@ -100,10 +100,10 @@ void MapFilter::update()
 
     send_update_ = false;
 
-    std::cout << "[ED FITTER] Received new map or had an updated entity pose!" << std::endl;
+    ROS_DEBUG_STREAM("[ROBOCUP] Received new map or had an updated entity pose!");
 
-    unsigned int w = map_in_->info.width;
-    unsigned int h = map_in_->info.height;
+    uint w = map_in_->info.width;
+    uint h = map_in_->info.height;
 
     res_ = map_in_->info.resolution;
 
@@ -116,30 +116,30 @@ void MapFilter::update()
     }
     else
     {
-        if (mask_.cols != w || mask_.rows != h)
+        if (static_cast<uint>(mask_.cols) != w || static_cast<uint>(mask_.rows) != h)
         {
             // Resize!
 
             int dx = (map_origin_.x - map_in_->info.origin.position.x) / res_;
             int dy = (map_origin_.y - map_in_->info.origin.position.y) / res_;
 
-            std::cout << "dx = " << dx << ", dy = " << dy << std::endl;
+            ROS_DEBUG_STREAM("[ROBOCUP] resizing: dx=" << dx << ", dy=" << dy);
 
             int w_new = std::max<int>(dx + mask_.cols, w) + 1;
             int h_new = std::max<int>(dy + mask_.rows, h) + 1;
 
             cv::Mat new_mask = cv::Mat(h_new, w_new, CV_8UC1, cv::Scalar(255));
 
-            for(int y = 0; y < mask_.rows; ++y)
+            for(uint y = 0; y < static_cast<uint>(mask_.rows); ++y)
             {
-                for(int x = 0; x < mask_.cols; ++x)
+                for(uint x = 0; x < static_cast<uint>(mask_.cols); ++x)
                 {
                     new_mask.at<unsigned char>(y + dy, x + dx) = mask_.at<unsigned char>(y, x);
                 }
             }
 
-            std::cout << "old mask size: " << mask_.cols << " x " << mask_.rows << std::endl;
-            std::cout << "new mask size: " << new_mask.cols << " x " << new_mask.rows << std::endl;
+            ROS_DEBUG_STREAM("[ROBOCUP] resizing: old mask size:" << mask_.cols << " x " << mask_.rows);
+            ROS_DEBUG_STREAM("[ROBOCUP] resizing: new mask size:" << new_mask.cols << " x " << new_mask.rows);
 
 //            cv::Mat roi = new_mask(cv::Rect(cv::Point(dx, dy), cv::Point(mask_.cols, mask_.rows)));
 //            mask_.copyTo(roi);
@@ -151,17 +151,17 @@ void MapFilter::update()
 
             mask_ = new_mask;
 
-            std::cout << "Done!" << std::endl;
+            ROS_DEBUG_STREAM("[ROBOCUP] resizing done");
         }
     }
 
     nav_msgs::OccupancyGrid msg;
     filtered_map_ = *map_in_;
 
-    int k = 0;
-    for(unsigned int y = 0; y < h; ++y)
+    uint k = 0;
+    for (uint y = 0; y < h; ++y)
     {
-        for(unsigned int x = 0; x < w; ++x)
+        for (uint x = 0; x < w; ++x)
         {
             if (mask_.at<unsigned char>(y, x) == 0)
                 filtered_map_.data[k] = 0;
@@ -183,16 +183,16 @@ geo::ShapeConstPtr MapFilter::createWallShape(double height)
     if (filtered_map_.data.empty())
         return geo::ShapeConstPtr();
 
-    int w = filtered_map_.info.width;
-    int h = filtered_map_.info.height;
+    uint w = filtered_map_.info.width;
+    uint h = filtered_map_.info.height;
 
     // ------------------------------------------------------------------------------------------
 
-    int k = 0;
+    uint k = 0;
     std::vector<std::vector<double> > grid(w, std::vector<double>(h, 0));
-    for(unsigned int y = 0; y < h; ++y)
+    for (uint y = 0; y < h; ++y)
     {
-        for(unsigned int x = 0; x < w; ++x)
+        for (uint x = 0; x < w; ++x)
         {
             if (filtered_map_.data[k] > 0)
                 grid[x][y] = height;
@@ -210,7 +210,7 @@ geo::ShapeConstPtr MapFilter::createWallShape(double height)
 
     // ------------------------------------------------------------------------------------------
 
-    std::cout << "Walls have: " << shape->getMesh().getTriangleIs().size() << " triangles" << std::endl;
+    ROS_DEBUG_STREAM("Walls have: " << shape->getMesh().getTriangleIs().size() << " triangles");
 
     return shape;
 }

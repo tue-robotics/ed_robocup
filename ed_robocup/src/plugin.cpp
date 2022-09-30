@@ -43,7 +43,7 @@ bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup_ms
     {
         // depth image
         rgb_image = cv::Mat(image.rows, image.cols, CV_8UC3, cv::Scalar(0, 0, 0));
-        for(unsigned int i = 0; i < rgb_image.rows * rgb_image.cols; ++i)
+        for(unsigned int i = 0; i < static_cast<uint>(rgb_image.rows) * static_cast<uint>(rgb_image.cols); ++i)
             rgb_image.at<cv::Vec3b>(i) = (image.at<float>(i) / 10) * cv::Vec3b(255, 255, 255);
     }
     else
@@ -63,7 +63,7 @@ bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup_ms
         // Compress image
         if (!cv::imencode(".jpg", rgb_image, msg.data, rgb_params))
         {
-            std::cout << "RGB image compression failed" << std::endl;
+            ROS_ERROR("[ROBOCUP] RGB image compression failed");
             return false;
         }
     }
@@ -76,7 +76,7 @@ bool ImageToMsg(const cv::Mat& image, const std::string& encoding, ed_robocup_ms
         params[1] = 1;
 
         if (!cv::imencode(".png", rgb_image, msg.data, params)) {
-            std::cout << "PNG image compression failed" << std::endl;
+            ROS_ERROR("[ROBOCUP] PNG image compression failed");
             return false;
         }
     }
@@ -123,7 +123,7 @@ void RobocupPlugin::initialize(ed::InitData& init)
         while(config.nextArrayItem())
         {
             std::string id, type;
-            if (!config.value("id", id) | !config.value("type", type))
+            if (!config.value("id", id) || !config.value("type", type))
                 continue;
 
             ed::WorldModel world_model;
@@ -373,7 +373,7 @@ bool RobocupPlugin::srvFitEntityInImage(ed_robocup_msgs::FitEntityInImage::Reque
 
 // ----------------------------------------------------------------------------------------------------
 
-bool RobocupPlugin::srvGetModelImages(ed_robocup_msgs::GetModelImages::Request& req, ed_robocup_msgs::GetModelImages::Response& res)
+bool RobocupPlugin::srvGetModelImages(ed_robocup_msgs::GetModelImages::Request& /*req*/, ed_robocup_msgs::GetModelImages::Response& res)
 {
     ROS_INFO("[ED] RobocupPlugin: GetModelImages requested");
 
@@ -397,7 +397,7 @@ bool RobocupPlugin::srvGetModelImages(ed_robocup_msgs::GetModelImages::Request& 
 
 // ----------------------------------------------------------------------------------------------------
 
-bool RobocupPlugin::srvCreateWalls(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
+bool RobocupPlugin::srvCreateWalls(std_srvs::Empty::Request& /*req*/, std_srvs::Empty::Response& /*res*/)
 {
     ROS_INFO("[ED] RobocupPlugin: CreateWalls requested");
 

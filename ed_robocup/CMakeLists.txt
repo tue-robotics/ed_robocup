@@ -8,10 +8,10 @@ find_package(catkin REQUIRED COMPONENTS
     cb_base_navigation_msgs
     ed
     ed_robocup_msgs
-    ed_sensor_integration
     head_ref_msgs
     nav_msgs
     rgbd
+    rgbd_image_buffer
     rgbd_msgs
 )
 

@@ -16,7 +16,7 @@
   <depend>cb_base_navigation_msgs</depend>
   <depend>ed</depend>
   <depend>ed_robocup_msgs</depend>
-  <depend>head_ref</depend>
+  <depend>head_ref_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>rgbd</depend>
   <depend>rgbd_image_buffer</depend>

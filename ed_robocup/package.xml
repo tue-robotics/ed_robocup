@@ -5,7 +5,7 @@
 <package format="3">
   <name>ed_robocup</name>
   <version>0.0.0</version>
-  <description>No description available</description>
+  <description>RoboCup specific plugin for the ED worldmodel</description>
 
   <maintainer email="todo@tue.nl">todo</maintainer>
 
@@ -13,14 +13,25 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>cb_base_navigation_msgs</depend>
-  <depend>ed</depend>
-  <depend>ed_robocup_msgs</depend>
-  <depend>head_ref_msgs</depend>
-  <depend>nav_msgs</depend>
-  <depend>rgbd</depend>
-  <depend>rgbd_image_buffer</depend>
-  <depend>rgbd_msgs</depend>
+  <build_depend>cb_base_navigation_msgs</build_depend>
+  <build_depend>ed</build_depend>
+  <build_depend>ed_robocup_msgs</build_depend>
+  <build_depend>head_ref_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>rgbd</build_depend>
+  <build_depend>rgbd_image_buffer</build_depend>
+  <build_depend>rgbd_msgs</build_depend>
+
+  <exec_depend>cb_base_navigation_msgs</exec_depend>
+  <exec_depend>ed</exec_depend>
+  <exec_depend>ed_robocup_msgs</exec_depend>
+  <exec_depend>head_ref_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>rgbd</exec_depend>
+  <exec_depend>rgbd_image_buffer</exec_depend>
+  <exec_depend>rgbd_msgs</exec_depend>
+
+  <test_depend>catkin_lint_cmake</test_depend>
 
   <export>
     <ed plugin="${prefix}/plugins.xml" />

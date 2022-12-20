@@ -4,8 +4,9 @@
 #include <ed/plugin.h>
 #include <ed/types.h>
 
-#include <ed/kinect/image_buffer.h>
 #include <ed/kinect/fitter.h>
+
+#include <rgbd/image_buffer/image_buffer.h>
 
 #include <tf/transform_listener.h>
 
@@ -53,7 +54,7 @@ private:
 
     // COMMUNICATION
 
-    ImageBuffer image_buffer_;
+    rgbd::ImageBuffer image_buffer_;
 
     ros::CallbackQueue cb_queue_;
 

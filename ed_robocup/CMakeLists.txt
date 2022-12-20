@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   cb_base_navigation_msgs
   ed
   ${PROJECT_NAME}_msgs
+  ed_sensor_integration
   head_ref_msgs
   nav_msgs
   rgbd

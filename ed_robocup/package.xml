@@ -16,6 +16,7 @@
   <build_depend>cb_base_navigation_msgs</build_depend>
   <build_depend>ed</build_depend>
   <build_depend>ed_robocup_msgs</build_depend>
+  <build_depend>ed_sensor_integration</build_depend>
   <build_depend>head_ref_msgs</build_depend>
   <build_depend>nav_msgs</build_depend>
   <build_depend>rgbd</build_depend>
@@ -25,6 +26,7 @@
   <exec_depend>cb_base_navigation_msgs</exec_depend>
   <exec_depend>ed</exec_depend>
   <exec_depend>ed_robocup_msgs</exec_depend>
+  <exec_depend>ed_sensor_integration</exec_depend>
   <exec_depend>head_ref_msgs</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>rgbd</exec_depend>

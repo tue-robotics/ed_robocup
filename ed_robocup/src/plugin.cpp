@@ -147,9 +147,9 @@ void RobocupPlugin::initialize(ed::InitData& init)
                 continue;
             }
 
-            if (!entity->shape())
+            if (!entity->visual())
             {
-                ed::log::error() << "While loading model '" << type << "': model does not have a shape" << std::endl;
+                ed::log::error() << "While loading model '" << type << "': model does not have a visual" << std::endl;
                 continue;
             }
 
@@ -407,7 +407,8 @@ bool RobocupPlugin::srvCreateWalls(std_srvs::Empty::Request& /*req*/, std_srvs::
     {
         ed::UUID id = "walls";
 
-        update_req_->setShape(id, shape);
+        update_req_->setVisual(id, shape);
+        update_req_->setCollision(id, shape);
         update_req_->setPose(id, geo::Pose3D::identity());
     }
 

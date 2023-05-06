@@ -95,11 +95,11 @@ cv::Mat Visualizer::drawWorldModelOverlay(const ed::WorldModel& world, const rgb
     {
         const ed::EntityConstPtr& e = *it;
 
-        if (!e->shape() || !e->has_pose() || ignore_ids.find(e->id().str()) != ignore_ids.end())
+        if (!e->visual() || !e->has_pose() || ignore_ids.find(e->id().str()) != ignore_ids.end())
             continue;
 
         geo::RenderOptions opt;
-        opt.setMesh(e->shape()->getMesh(), sensor_pose.inverse() * e->pose());
+        opt.setMesh(e->visual()->getMesh(), sensor_pose.inverse() * e->pose());
 
         res.i_entity = i_entity++;
 
